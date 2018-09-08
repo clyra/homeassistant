@@ -4,7 +4,7 @@ This is my repository of home-assistant related stuff. For now, check the unifi 
 shows the number of devices connected to your unifi APs and also shows the devices per AP and per ESSID as attributes
 of the sensor.
 
-![unifi sensor][https://]
+![unifi sensor][https://github.com/clyra/homeassistant/blob/master/unifi_sensor.png?raw=true]
 
 ## Install
 
