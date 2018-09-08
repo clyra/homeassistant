@@ -1,3 +1,13 @@
+
+"""
+Unifi sensor. Shows the total number os devices connected. Also shows the number of devices per
+AP and per essid as attributes.
+
+with code from https://github.com/frehov/Unifi-Python-API
+
+Version 0.1
+"""
+
 from datetime import timedelta
 from requests import Session
 import json
@@ -23,6 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 DOMAIN = 'sensor'
+ENTITY_ID_FORMAT = DOMAIN + '.{}'
 
 DEFAULT_NAME = 'Unifi'
 DEFAULT_SITE  = 'default'
