@@ -5,7 +5,7 @@ AP and per essid as attributes.
 
 with code from https://github.com/frehov/Unifi-Python-API
 
-Version 0.1
+Version 0.2
 """
 
 from datetime import timedelta
@@ -219,9 +219,13 @@ class UnifiSensorData(object):
         return data
 
     def update_ap_list(self, newmac):
-        
+
         device_info = (self.list_devices(mac=newmac))
-        self._ap_list[newmac] = "AP_" + device_info[0]['name']
+        try:
+            self._ap_list[newmac] = "AP_" + device_info[0]['name']
+        except:
+            self._ap_list[newmac] = newmac
+
 
     def update(self):
         self.login()
