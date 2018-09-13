@@ -234,14 +234,17 @@ class UnifiSensorData(object):
         device_list = (self.list_clients())
         for device in device_list:
           self.total += 1
-          if device['essid'] in devices_per_essid.keys():
-            devices_per_essid[device['essid']] += 1   
-          else:
-            devices_per_essid[device['essid']] = 1   
-          if device['ap_mac'] in devices_per_ap.keys():
-            devices_per_ap[device['ap_mac']] += 1   
-          else:
-            devices_per_ap[device['ap_mac']] = 1   
+          try:
+            if device['essid'] in devices_per_essid.keys():
+              devices_per_essid[device['essid']] += 1   
+            else:
+              devices_per_essid[device['essid']] = 1   
+            if device['ap_mac'] in devices_per_ap.keys():
+              devices_per_ap[device['ap_mac']] += 1   
+            else:
+              devices_per_ap[device['ap_mac']] = 1   
+          except:
+            _LOGGER.error("error processing device %s", device["mac"])
 
         for ap in devices_per_ap.keys():
             if ap in self._ap_list.keys():    
