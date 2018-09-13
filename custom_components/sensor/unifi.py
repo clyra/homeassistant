@@ -234,19 +234,23 @@ class UnifiSensorData(object):
         devices_per_essid = {}
         devices_per_ap = {}
         devices_per_ap_name = {}
+        devices_wired = 0
 
         device_list = (self.list_clients())
         for device in device_list:
           self.total += 1
           try:
-            if device['essid'] in devices_per_essid.keys():
-              devices_per_essid[device['essid']] += 1   
-            else:
-              devices_per_essid[device['essid']] = 1   
-            if device['ap_mac'] in devices_per_ap.keys():
-              devices_per_ap[device['ap_mac']] += 1   
-            else:
-              devices_per_ap[device['ap_mac']] = 1   
+            if device['is_wired']:
+                devices_wired += 1
+            else:    
+                if device['essid'] in devices_per_essid.keys():
+                  devices_per_essid[device['essid']] += 1   
+                else:
+                  devices_per_essid[device['essid']] = 1   
+                if device['ap_mac'] in devices_per_ap.keys():
+                  devices_per_ap[device['ap_mac']] += 1   
+                else:
+                  devices_per_ap[device['ap_mac']] = 1   
           except:
             _LOGGER.error("error processing device %s", device["mac"])
 
@@ -262,6 +266,8 @@ class UnifiSensorData(object):
           self.attrs[key] = devices_per_essid[key]
         for key in devices_per_ap_name.keys():
           self.attrs[key] = devices_per_ap_name[key]
+        if devices_wired > 0:
+          self.attrs['wired'] =devices_wired 
 
         self.logout()      
 

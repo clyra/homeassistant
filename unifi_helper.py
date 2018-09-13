@@ -102,7 +102,7 @@ class API(object):
 
 if __name__ == "__main__":
 
-  api = API(username="admin", password="your_password", baseurl="https://your_ip:8443", verify_ssl=False)
+  api = API(username="admin", password="your_pw", baseurl="https://your_ip:8443", verify_ssl=False)
   api.login()
   device_list = (api.list_clients(order_by="ip"))
   print(json.dumps(device_list, indent=4))
