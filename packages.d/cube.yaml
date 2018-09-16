@@ -1,0 +1,202 @@
+# grab the python scene_genertor script from here
+# https://github.com/sunnythaper/python_scripts
+
+
+homeassistant:
+  customize:
+    package.node_anchors:
+      mycube: &mycube binary_sensor.cube_158d0000000
+    
+input_select:
+   cube_light_color:
+     name: color
+     options:
+       - white
+       - red
+       - orangered
+       - orange
+       - gold
+       - yellow
+       - yellowgreen
+       - green
+       - teal
+       - blue
+       - blueviolet
+       - purple
+       - magenta
+   cube_light:
+     name: light
+     options:
+       - light.rc1
+       - light.rc3
+       - light.c1
+       - light.fita_sala
+   cube_mode:
+     name: cube mode
+     options:
+       - color
+       - brightness
+   cube_scene:
+     name: Scene
+     options:
+       - movie
+       - default_room_light
+
+notify:
+  - name: scene_generator
+    platform: file
+    filename: cube_generated_scene.yaml
+    timestamp: true
+
+automation:
+  - id: rotate_cube_color
+    alias: Rotate to set color
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: rotate
+    condition:
+      - condition: state
+        entity_id: input_select.cube_mode
+        state: 'color'
+    action:
+      - service_template: >
+            {% if trigger.event.data.action_value | float > 0  %}
+              input_select.select_next
+            {% else  %}
+              input_select.select_previous
+            {% endif %}
+        data: 
+          entity_id: input_select.cube_light_color
+      - service: light.turn_on
+        data_template:
+          entity_id: "{{ states('input_select.cube_light') }}"
+          color_name: "{{ states('input_select.cube_light_color') }}"
+
+  - id: rotate_cube_brightness
+    alias: Rotate to set brightness
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: rotate
+    condition:
+      - condition: state
+        entity_id: input_select.cube_mode
+        state: 'brightness'
+    action:
+      - service_template: >
+            {% if trigger.event.data.action_value | float > 0  %}
+              input_select.select_next
+            {% else  %}
+              input_select.select_previous
+            {% endif %}
+        data: 
+          entity_id: input_select.cube_light_color
+      - service: light.turn_on
+        data_template:
+          entity_id: "{{ states('input_select.cube_light') }}"
+          brightness: >
+             {% if trigger.event.data.action_value | float > 0  %}
+               {{ state_attr( states('input_select.cube_light'), 'brightness')| int + 25}}
+             {% else %}
+               {{ state_attr( states('input_select.cube_light'), 'brightness')| int - 25}}
+             {% endif %}
+
+  - id: flip90_cube_light
+    alias: Flip90 to select light
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: flip90
+    action:
+      - service: input_select.select_next
+        entity_id: input_select.cube_light
+      - service: light.turn_on
+        data_template:
+          entity_id: "{{ states('input_select.cube_light') }}"
+          flash: short
+
+  - id: flip180_cube_mode
+    alias: Flip180 to select mode 
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: flip180
+    action:
+      - service: input_select.select_next
+        entity_id: input_select.cube_mode
+      - service: light.turn_on
+        data_template:
+          entity_id: "{{ states('input_select.cube_light') }}"
+          flash: short
+  
+  - id: tap_twice_toggle
+    alias: Tap twice to toggle light
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: tap_twice
+    action:
+      - service: light.toggle
+        data_template:
+          entity_id: "{{ states('input_select.cube_light') }}"
+  
+  - id: shake_cube_scene
+    alias: Shake cube to change scene
+    hide_entity: True
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: shake_air
+    action:
+      - service: input_select.select_next
+        entity_id: input_select.cube_scene
+      - service: scene.turn_on
+        data_template:
+          entity_id: "scene.{{ states('input_select.cube_scene') }}"
+
+  - id: free_fall_cube_save
+    alias: Free fall cube to save scene
+    hide_entity: True
+    initial_state: 'on' 
+    trigger:
+      platform: event
+      event_type: cube_action
+      event_data:
+        entity_id: *mycube
+        action_type: free_fall
+    action:
+      - service: python_script.scene_generator
+        data:
+          domains:
+            - light
+            - switch
+          attributes:
+            - brightness
+            - color_temp
+            - rgb_color
+            - xy_color
+          save_file: True
