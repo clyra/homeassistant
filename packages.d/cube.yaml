@@ -1,6 +1,17 @@
 # grab the python scene_genertor script from here
 # https://github.com/sunnythaper/python_scripts
 
+# change the mycube definition for your device
+# change cube_light list to your lights
+# change cube_scene list to your scenes
+
+# how to use:
+# rotate: change color or brightness based on cube_mode state
+# flip90 - selec the the light to control. light will blink when selected
+# flip180 - toggle color/brigthness mode. light will blink when selected
+# tap twice - selected light will toggle on/off
+# shake - select and apply scene from cube_scene list
+# free fall - call generate_scene script and save it in cube_generated_scene.yaml at configuration folder
 
 homeassistant:
   customize:
