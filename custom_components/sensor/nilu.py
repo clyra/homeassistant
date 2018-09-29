@@ -1,11 +1,7 @@
 
 """
-Unifi sensor. Shows the total number os devices connected. Also shows the number of devices per
-AP and per essid as attributes.
-
-with code from https://github.com/frehov/Unifi-Python-API
-
-Version 0.2
+Nilu Sensor (https://community.home-assistant.io/t/programing-python-sensor-platform-need-help-finalizing/69134)
+Version 0.0.1
 """
 
 from datetime import timedelta
