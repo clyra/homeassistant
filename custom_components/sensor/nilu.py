@@ -43,7 +43,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     data = NiluSensorData(hass, area, station)
 
     for k in data.attrs.keys():
-        name = data.attrs[k]['municipality'].lower() + "_" + data.attrs[k]['station'].lower() + "_" + k.lower()
+        name = data.attrs[k]['municipality'].lower() + " " + data.attrs[k]['station'].lower() + " " + k.lower()
         add_devices([NiluSensor(hass, data, k, name)], True)
 
 
@@ -93,7 +93,7 @@ class NiluSensor(Entity):
             value = STATE_UNKNOWN
             self._attributes = {}
         else:
-            self._state = value   
+            self._state = "{0:.2f}".format(value)   
             self._attributes = self._data.attrs[self._component] 
 
     
