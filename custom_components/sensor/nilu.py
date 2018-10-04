@@ -45,7 +45,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     for k in data.attrs.keys():
         name = data.attrs[k]['municipality'].lower() + " " + data.attrs[k]['station'].lower() + " " + k.lower()
         add_devices([NiluSensor(hass, data, k, name)], True)
-
+    add_devices([NiluSensor(hass, data, k, str(area + " " + station + " " + "state"), True)])
 
 class NiluSensor(Entity):
     """Representation of a Unifi Sensor."""
@@ -126,9 +126,14 @@ class NiluSensorData(object):
             _LOGGER.error("couldnt get data from Nilu API. Check if parameters are correct.")
             return None
 
+        state_sensor = {}    
         for i in range(len(myData)):
             component = myData[i]['component'].replace(".","")
             self.attrs[component] = myData[i]
+            if len(state_sensor) < 1:
+                self.attrs['state'] = myData[i]
+            elif myData[i]['value'] > self.attrs['state']['value']:
+                self.attrs['state'] = myData[i]
 
     def update(self):
         self.get_data()
