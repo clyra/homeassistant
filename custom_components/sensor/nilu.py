@@ -43,12 +43,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     data = NiluSensorData(hass, area, station)
 
     for k in data.attrs.keys():
-        name = data.attrs[k]['municipality'].lower() + " " + data.attrs[k]['station'].lower() + " " + k.lower()
-        add_devices([NiluSensor(hass, data, k, name)], True)
-    add_devices([NiluSensor(hass, data, k, str(area + " " + station + " " + "state"), True)])
+        name = data.attrs[k]['municipality'].lower() + " " + data.attrs[k]['station'].lower() + " " 
+        add_devices([NiluSensor(hass, data, k, name + k.lower())], True)
+#    _LOGGER.error("adding max sensor")
+#    add_devices([NiluSensor(hass, data, 'max', name + "max")], True)
 
 class NiluSensor(Entity):
-    """Representation of a Unifi Sensor."""
+    """Representation of a nilu Sensor."""
 
     def __init__(self, hass, data, component, name):
         """Initialize the sensor."""
@@ -69,11 +70,6 @@ class NiluSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         return self._unit_of_measurement
-
-#    @property
-#    def precision(self):
-#        """Return the precision of the system."""
-#        return PRECISION_WHOLE
 
     @property
     def state(self):
@@ -110,7 +106,7 @@ class NiluSensorData(object):
         Initiates tha api and grab the components.
         """
         self._hass = hass
-        self._url = 'https://api.nilu.no/aq/utd.json?areas={}&stations={}'.format(area, station)
+        self._url = 'https://api.nilu.no/aq/utd?areas={}&stations={}'.format(area, station)
         self.attrs = {}
 
         self.update()
@@ -125,15 +121,15 @@ class NiluSensorData(object):
         except:
             _LOGGER.error("couldnt get data from Nilu API. Check if parameters are correct.")
             return None
-
+        
         state_sensor = {}    
         for i in range(len(myData)):
             component = myData[i]['component'].replace(".","")
             self.attrs[component] = myData[i]
             if len(state_sensor) < 1:
-                self.attrs['state'] = myData[i]
-            elif myData[i]['value'] > self.attrs['state']['value']:
-                self.attrs['state'] = myData[i]
+                self.attrs['max'] = myData[i]
+            elif myData[i]['index'] > self.attrs['max']['index']:
+                self.attrs['max'] = myData[i]
 
     def update(self):
         self.get_data()
