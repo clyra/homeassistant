@@ -122,11 +122,10 @@ class NiluSensorData(object):
             _LOGGER.error("couldnt get data from Nilu API. Check if parameters are correct.")
             return None
         
-        state_sensor = {}    
         for i in range(len(myData)):
             component = myData[i]['component'].replace(".","")
             self.attrs[component] = myData[i]
-            if len(state_sensor) < 1:
+            if i==0:
                 self.attrs['max'] = myData[i]
             elif myData[i]['index'] > self.attrs['max']['index']:
                 self.attrs['max'] = myData[i]
