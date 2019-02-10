@@ -41,7 +41,7 @@ Copy climatempo.py to your home-assistant custom_components/weather folder.
 ## Configure
 
 You will need a api_key to be able to use this component. Go to https://advisor.climatempo.com.br, login, Tokens and create a new projet.
-Find your city code using http://apiadvisor.climatempo.com.br/api/v1/locale/city?name=<city>&state=<state>&token=<your-app-token>
+Find your city code using http://apiadvisor.climatempo.com.br/api/v1/locale/city?name=yourcity&state=yourstate&token=your-app-token
 
 Add the following to your weather configuration:
 
