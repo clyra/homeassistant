@@ -52,5 +52,4 @@ weather:
      api_key: <your token>
      city: <city_code>
 ```
-weather:
 
