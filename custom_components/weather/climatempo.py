@@ -149,10 +149,10 @@ class ClimatempoWeather(WeatherEntity):
     def forecast(self):
         """Return the forecast array."""
 
-        if time.daylight == 0:
-            offset = time.timezone
-        else:
+        if time.localtime().tm_isdst == 1:
             offset = time.altzone
+        else:
+            offset = time.timezone
 
         data = []
         data = [{
@@ -173,6 +173,9 @@ class ClimatempoWeather(WeatherEntity):
                 ATTR_FORECAST_CONDITION:
                     MAP_CONDITION.get(entry['text_icon']['icon']['day']),
             } for entry in self._ct.daily]
+
+        for i in data:
+           _LOGGER.info(i[ATTR_FORECAST_TIME])
 
         return data
 
