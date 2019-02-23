@@ -174,9 +174,6 @@ class ClimatempoWeather(WeatherEntity):
                     MAP_CONDITION.get(entry['text_icon']['icon']['day']),
             } for entry in self._ct.daily]
 
-        for i in data:
-           _LOGGER.info(i[ATTR_FORECAST_TIME])
-
         return data
 
     def update(self):
