@@ -14,7 +14,7 @@ of the sensor.
 
 ## Install
 
-Copy sensor/unifi.py to your home-assistant custom_components/sensor folder.
+Copy my_unifi folder to your home-assistant custom_components folder.
 
 ## Configure
 
@@ -36,7 +36,7 @@ A Weather component that fetch the weather condition and forecast from climatemp
 
 ## Install
 
-Copy climatempo.py to your home-assistant custom_components/weather folder.
+Copy climatempo folder to your home-assistant custom_components folder.
 
 ## Configure
 
