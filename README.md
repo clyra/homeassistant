@@ -22,7 +22,7 @@ Add the following to your sensors configuration:
 
 ```yaml
 sensor:
-   - platform: unifi
+   - platform: my_unifi
      name: <whatever you want> (optional, default: "unifi")
      region: <site name> (optional, default: "default")
      username: <unifi_controller_username>
