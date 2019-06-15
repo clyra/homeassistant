@@ -62,12 +62,12 @@ Copy humanity folder to your home-assistant custom_components folder.
 
 ## configure
 
-You will have to ask for api access on humanity website. Then got to settings -> Integration API v2 and create a API Application there. There's no need of a "Redirection URI". You will need to copy App ID and App Secret from this page. If this info, configure the component on HA:      
+You will have to ask for api access on humanity website. Then got to settings -> Integration API v2 and create a API Application there. There's no need of a "Redirection URI". You will need to copy App ID and App Secret from this page. With this info, configure the component on HA:      
 
 ```yaml
 sensor:
    - platform: humanity
-     name: <whatever you want> (optional, default "climatempo")
+     name: <whatever you want> (optional, default "humanity")
      app_id: <your app_id>
      app_secret: <your app_secret>
      username: <username used to login on humanity>
