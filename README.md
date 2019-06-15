@@ -52,4 +52,26 @@ weather:
      api_key: <your token>
      city: <city_code>
 ```
+# Humanity
 
+A custom component that fetch today and tomorrow shifts from humanity.com.
+
+## Install
+
+Copy humanity folder to your home-assistant custom_components folder.
+
+## configure
+
+You will have to ask for api access on humanity website. Then got to settings -> Integration API v2 and create a API Application there. There's no need of a "Redirection URI". You will need to copy App ID and App Secret from this page. If this info, configure the component on HA:      
+
+```yaml
+sensor:
+   - platform: humanity
+     name: <whatever you want> (optional, default "climatempo")
+     app_id: <your app_id>
+     app_secret: <your app_secret>
+     username: <username used to login on humanity>
+     password: <password used to login on humanity>
+```
+
+Create a entities card on lovelace to show the today and tomorrow sensors.
