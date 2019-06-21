@@ -223,8 +223,9 @@ class HumanityData:
      employees = []
      for i in shifts:
       if i['start_date']['day'] == shift_date.day and i['start_date']['month'] == shift_date.month and i['start_date']['year'] == shift_date.year:
-        for j in i['employees']:
-          employees.append(j['name'])
+        if 'employees' in i.keys():
+          for j in i['employees']:
+            employees.append(j['name'])
      if len(employees) == 0:
           employees.append('Nobody')     
      return employees     
