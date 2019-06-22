@@ -115,8 +115,9 @@ class HumanityData:
      employees = []
      for i in shifts:
       if i['start_date']['day'] == shift_date.day and i['start_date']['month'] == shift_date.month and i['start_date']['year'] == shift_date.year:
-        for j in i['employees']:
-          employees.append(j['name'])
+        if 'employees' in i.keys():
+          for j in i['employees']:
+            employees.append(j['name'])
      if len(employees) == 0:
           employees.append('Nobody')     
      return employees     
@@ -124,13 +125,15 @@ class HumanityData:
   def update(self):
      shifts = self.get_shifts()
 
+     print(shifts)
+     print("getting today shifts")
      self.today = self.get_date_shift(shifts, datetime.datetime.now())
+     print(self.today)
+     print("getting tomorrow shifts")
      self.tomorrow = self.get_date_shift(shifts, datetime.datetime.now() + datetime.timedelta(days=1))
-
-     #print(self.today, self.tomorrow)
+     print(self.tomorrow)
 
 if __name__ == "__main__":
 
   h = HumanityData(app_id, app_secret, user, pwd)
   h.update()
-  print(h.today, h.tomorrow)
