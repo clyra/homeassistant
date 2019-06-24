@@ -164,6 +164,7 @@ class HumanityData:
     except:
       _LOGGER.error(
                 'couldnt get access token from refresh_token')
+      self.get_token()
 
   def check_count(self):
      """check if it's time to refresh token"""
@@ -221,11 +222,18 @@ class HumanityData:
   def get_date_shift(self, shifts, shift_date):
 
      employees = []
+
+     # basic test to see if shifts is a list
+     if type(shifts) is not list:
+       employees.append('Nobody')     
+       return employees     
+       
      for i in shifts:
       if i['start_date']['day'] == shift_date.day and i['start_date']['month'] == shift_date.month and i['start_date']['year'] == shift_date.year:
         if 'employees' in i.keys():
-          for j in i['employees']:
-            employees.append(j['name'])
+          if i['employees'] != None:
+            for j in i['employees']:
+              employees.append(j['name'])
      if len(employees) == 0:
           employees.append('Nobody')     
      return employees     
