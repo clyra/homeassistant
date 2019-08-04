@@ -7,6 +7,7 @@ import logging
 import requests
 import json
 import re
+from bs4 import BeautifulSoup
 
 import voluptuous as vol
 
@@ -17,7 +18,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-REQUIREMENTS = ['requests']
+REQUIREMENTS = ['requests', 'bs4']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -134,63 +135,50 @@ class SimeparSensor(Entity):
             _LOGGER.error("Error when calling Simepar to update data")
             return
 
-        today = self.sm_client.currently
-        tomorrow = self.sm_client.tomorrow
-        lasthour = self.sm_client.hourly[0]
-
-        if today is None:
-            return
+        d = self.sm_client.data
 
         try:
             if self.type == 'weather_now':
-                self._state = MAP_CONDITION.get(today['icon_last_hour'])
+                self._state = d['condition_today']
             elif self.type == 'weather_today':
-                self._state = MAP_CONDITION.get(today['icon'])
+                self._state = d['condition_today']
             elif self.type == 'weather_tomorrow':
-                self._state = MAP_CONDITION.get(tomorrow['icon'])
+                self._state = d['condition_tomorrow']
             elif self.type == 'temp_now':
-                self._state = today['temp_hour']
+                self._state = d['temperature_now']
             elif self.type == 'temp_max_today':
-                self._state = today['tempMax']
+                self._state = d['temperature_max_today'] 
             elif self.type == 'temp_min_today':
-                self._state = today['tempMin']
+                self._state = d['temperature_min_today']
             elif self.type == 'temp_max_tomorrow':
-                self._state = tomorrow['tempMax']
+                self._state = d['temperature_max_tomorrow']
             elif self.type == 'temp_min_tomorrow':
-                self._state = tomorrow['tempMin']
+                self._state = d['temperature_min_tomorrow']
             elif self.type == 'pressure_now':
-                self._state = today['pressure'] 
+                self._state = 0
             elif self.type == 'humidity_now':
-                self._state = today['humidity_hour'] 
+                self._state = 0
             elif self.type == 'wind_speed_now':
-                self._state = round(today['wind_hour']*3.6) 
+                self._state = 0
             elif self.type == 'wind_bearing_now':
-                self._state = today['windDirection_hour']
+                self._state = 0
             elif self.type == 'rain_now':
-                self._state = today['precIntensity_hour']
+                self._state = d['rain_now']
             elif self.type == 'rain_today':
-                self._state = today['precIntensity']
+                self._state = d['rain_today']
             elif self.type == 'rain_tomorrow':
-                self._state = tomorrow['precIntensity']
+                self._state = d['rain_tomorrow']
             elif self.type == 'rain_chance_today':
-                self._state = today['precProbability'] * 100;
+                self._state = d['chance_of_rain_today']
             elif self.type == 'rain_chance_tomorrow':
-                self._state = tomorrow['precProbability'] * 100;
+                self._state = d['chance_of_rain_tomorrow']
             elif self.type == 'uv_index_now':
-                self._state = lasthour['uvIndex']
+                self._state = 0
             elif self.type == 'uv_index_today':
-                self._state = today['uvIndex']
+                self._state = 0
             elif self.type == 'uv_index_tomorrow':
-                self._state = tomorrow['uvIndex']
+                self._state = 0
 
-
-#            elif self.type == 'rain':
-#                if data.get_rain():
-#                    self._state = round(data.get_rain()['3h'], 0)
-#                    self._unit_of_measurement = 'mm'
-#                else:
-#                    self._state = 'not raining'
-#                    self._unit_of_measurement = ''
 
         except KeyError:
             self._state = None
@@ -203,39 +191,60 @@ class SimeparData:
 
     def __init__(self, URL):
         """Initialize the data object."""
+        import re
+
         self._url = URL
 
-        self.data = None
-        self.currently = None
-        self.hourly = None
-        self.daily = None
+        self.data = {}
 
-        self.json_re = re.compile(r'forecastJSON.*(\[.*\])')
+        self.json_re = re.compile(r'.*json.*(\{.*a\>\"\}).*')
+        self.forecast_icon_re = re.compile(r'.*wi\s(wi[\w|-]*)\s.*')
+        self.forecast_cond_re = re.compile(r'.*title="([\w|\s]*)".*')
+        self.forecast_temp_re = re.compile(r'.*data:\s\[([\d|,]*)\].*')
+        self.digit_re = re.compile(r'[\d|.]+')
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Get the latest data from Simepar."""
+        import requests
+        import json
+        import re
+        from bs4 import BeautifulSoup
 
         _LOGGER.info("updating simepar")
 
         try:
             r = requests.get(self._url)
-            f = self.json_re.search(r.text)
-            self.data = json.loads(f.groups()[0])
-            self.currently = self.data[0]
-            self.tomorrow = self.data[1]
-            self.hourly = []
-            hourlylist = []
-            for i in self.data[0]['hour'].keys():
-               hourlylist.append(self.data[0]['hour'][i])
-            self.hourly = sorted(hourlylist, key=lambda k: k['timestamp'])
-            self.daily = self.data
+            r.encondig="utf-8"
+            s = BeautifulSoup(r.text, 'html.parser')
+            ji = self.json_re.search(r.text)
+            j = json.loads(ji.groups()[0]) 
+            forecast_list = []
+            for i in sorted(j.keys()):
+              forecast_list.append(ascii(j[i]))
+
+            forecast_temp_list = self.forecast_temp_re.findall(r.text)
+            self.data['temperature_now'] = self.digit_re.findall(s.find_all(class_='currentTemp')[0].text)[0]
+            self.data['rain_now'] = self.digit_re.findall(s.find_all('span', class_='var')[1].next.next.next.text.strip())[0]
+            self.data['rain_today'] = self.digit_re.findall(s.find_all('span', class_='var')[5].next.next.next.text.strip())[0]
+            self.data['chance_of_rain_today'] = self.digit_re.findall(s.find_all('span', class_='var')[6].next.next.next.text.strip())[0]
+            self.data['condition_today'] = self.forecast_cond_re.search(forecast_list[0]).groups()[0]
+            self.data['icon_today'] = self.forecast_icon_re.search(forecast_list[0]).groups()[0]
+            self.data['temperature_max_today'] = forecast_temp_list[0].split(",")[0]
+            self.data['temperature_min_today'] = forecast_temp_list[1].split(",")[0]
+            self.data['rain_tomorrow'] = self.digit_re.findall(s.find_all('span', class_='var')[11].next.next.next.text.strip())[0]
+            self.data['chance_of_rain_tomorrow'] = self.digit_re.findall(s.find_all('span', class_='var')[12].next.next.next.text.strip())[0]
+            self.data['condition_tomorrow'] = self.forecast_cond_re.search(forecast_list[1]).groups()[0]
+            self.data['icon_tomorrow'] = self.forecast_icon_re.search(forecast_list[1]).groups()[0]
+            self.data['temperature_max_tomorrow'] = forecast_temp_list[0].split(",")[1]
+            self.data['temperature_min_tomorrow'] = forecast_temp_list[1].split(",")[1]
+
+
         except:
             _LOGGER.error("Unable to connect to Simepar.")
-            self.data  = None
-            self.daily = None
+            self.data  = { 'temperature_now': '1000', 'rain_now': '1000', 'rain_today': '1000' }
 
-    @property
-    def units(self):
-        """Get the unit system of returned data."""
-        return self.data.json.get('flags').get('units')
+    #@property
+    #def units(self):
+        #"""Get the unit system of returned data."""
+        #return self.data.json.get('flags').get('units')
