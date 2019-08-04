@@ -1,0 +1,8 @@
+{
+  "domain": "simepar",
+  "name": "simepar",
+  "documentation": "https://github.com/clyra/homeassistant",
+  "dependencies": [ ],
+  "codeowners": ["@clyra"],
+  "requirements": [ 'requests', 'bs4' ]
+}
