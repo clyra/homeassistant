@@ -1,0 +1,8 @@
+{
+  "domain": "fortnite",
+  "name": "Fortnite Sensor",
+  "documentation": "",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": [ "fortnite-python==0.3.5"]
+}
